@@ -22,7 +22,8 @@ slack-queue-system/
 │   ├── queue_manager.py    # Main queue management logic
 │   ├── slack_client.py     # Slack API integration
 │   ├── database.py         # SQLite database operations
-│   └── cron_job.py        # Cron job entry point
+│   ├── cron_job.py        # Cron job entry point
+│   └── api_server.py      # Local REST API server
 ├── config/
 ├── data/                   # SQLite database storage
 ├── logs/                   # Application logs
@@ -153,6 +154,58 @@ source venv/bin/activate
 python src/cron_job.py
 ```
 
+### Local API Server
+
+Start the local REST API server for programmatic access:
+
+```bash
+source venv/bin/activate
+python src/api_server.py
+```
+
+The API server runs on `http://localhost:5000` by default and provides these endpoints:
+
+**Update Task Status:**
+```bash
+# Set task #5 to in_progress
+curl -X PUT http://localhost:5000/api/tasks/5/status \
+  -H "Content-Type: application/json" \
+  -d '{"status": "in_progress"}'
+
+# Set task #5 to completed
+curl -X PUT http://localhost:5000/api/tasks/5/status \
+  -H "Content-Type: application/json" \
+  -d '{"status": "completed"}'
+```
+
+**Get Tasks:**
+```bash
+# Get all tasks
+curl http://localhost:5000/api/tasks
+
+# Get tasks by status
+curl http://localhost:5000/api/tasks?status=in_progress
+
+# Get specific task
+curl http://localhost:5000/api/tasks/5
+```
+
+**Other Endpoints:**
+```bash
+# Get queue statistics
+curl http://localhost:5000/api/stats
+
+# Create new task
+curl -X POST http://localhost:5000/api/tasks \
+  -H "Content-Type: application/json" \
+  -d '{"title": "New task", "description": "Task description", "priority": "high"}'
+
+# Health check
+curl http://localhost:5000/api/health
+```
+
+Valid task statuses: `pending`, `in_progress`, `completed`, `cancelled`
+
 ### Direct Database Operations
 
 ```bash
@@ -239,6 +292,7 @@ All components used are fully open source:
 - **slack-sdk**: Apache License 2.0
 - **python-dotenv**: BSD 3-Clause License
 - **schedule**: MIT License
+- **flask**: BSD 3-Clause License
 - **SQLite**: Public Domain
 
 ## License
