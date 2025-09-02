@@ -1,9 +1,9 @@
-version: '3.8'
-
 services:
   # API Server - REST API for task management
   api:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.api
     container_name: slack-queue-api
     ports:
       - "5000:5000"
@@ -26,7 +26,9 @@ services:
 
   # Cron Job Service - Processes Slack commands periodically
   cron:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.cron
     container_name: slack-queue-cron
     volumes:
       - ./data:/app/data
