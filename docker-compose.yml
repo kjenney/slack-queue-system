@@ -7,15 +7,14 @@ services:
     container_name: slack-queue-api
     ports:
       - "5000:5000"
+    env_file: .env
     volumes:
       - ./data:/app/data
       - ./logs:/app/logs
-      - ./.env:/app/.env
     environment:
       - API_HOST=0.0.0.0
       - API_PORT=5000
       - API_DEBUG=false
-    command: python src/api_server.py
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
@@ -30,19 +29,12 @@ services:
       context: .
       dockerfile: Dockerfile.cron
     container_name: slack-queue-cron
+    env_file: .env
     volumes:
       - ./data:/app/data
       - ./logs:/app/logs
-      - ./.env:/app/.env
     environment:
       - PYTHONUNBUFFERED=1
-    command: |
-      sh -c "
-        echo '*/5 * * * * cd /app && python src/cron_job.py >> /app/logs/cron.log 2>&1' > /etc/cron.d/slack-queue &&
-        chmod 0644 /etc/cron.d/slack-queue &&
-        crontab /etc/cron.d/slack-queue &&
-        cron -f
-      "
     restart: unless-stopped
     depends_on:
       - api
