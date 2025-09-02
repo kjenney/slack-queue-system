@@ -64,17 +64,20 @@ def main():
             # Send notification about overdue items
             channels = os.getenv('SLACK_CHANNELS', '').split(',')
             for channel in channels:
-                if channel.strip():
-                    msg = f"⚠️ *Overdue Tasks Alert*\n"
-                    msg += f"There are {len(overdue_items)} overdue tasks:\n"
-                    
-                    for item in overdue_items[:5]:  # Limit to first 5
-                        msg += f"• #{item['id']}: {item['title']} (Due: {item['due_date']})\n"
-                    
-                    if len(overdue_items) > 5:
-                        msg += f"... and {len(overdue_items) - 5} more"
-                    
-                    manager.slack.send_message(channel=channel.strip(), text=msg)
+                channel_name = channel.strip()
+                if channel_name:
+                    channel_id = manager.slack.resolve_channel_id(channel_name)
+                    if channel_id:
+                        msg = f"⚠️ *Overdue Tasks Alert*\n"
+                        msg += f"There are {len(overdue_items)} overdue tasks:\n"
+                        
+                        for item in overdue_items[:5]:  # Limit to first 5
+                            msg += f"• #{item['id']}: {item['title']} (Due: {item['due_date']})\n"
+                        
+                        if len(overdue_items) > 5:
+                            msg += f"... and {len(overdue_items) - 5} more"
+                        
+                        manager.slack.send_message(channel=channel_id, text=msg)
         
         # Send daily summary if it's the configured time
         hour = int(os.getenv('DAILY_SUMMARY_HOUR', '9'))
@@ -100,10 +103,12 @@ def main():
             if error_channel:
                 from src.slack_client import SlackClient
                 slack = SlackClient()
-                slack.send_message(
-                    channel=error_channel.strip(),
-                    text=f"❌ Queue system cron job error: {str(e)}"
-                )
+                channel_id = slack.resolve_channel_id(error_channel.strip())
+                if channel_id:
+                    slack.send_message(
+                        channel=channel_id,
+                        text=f"❌ Queue system cron job error: {str(e)}"
+                    )
         except:
             pass  # Don't fail the entire job if error notification fails
         

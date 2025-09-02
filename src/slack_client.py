@@ -125,6 +125,26 @@ class SlackClient:
             self.logger.error(f"Error listing channels: {e}")
             return []
     
+    def resolve_channel_id(self, channel: str) -> Optional[str]:
+        """Resolve channel name to channel ID"""
+        
+        # If it looks like it's already a channel ID (starts with C)
+        if channel.startswith('C'):
+            return channel
+            
+        # If it starts with #, remove it
+        if channel.startswith('#'):
+            channel = channel[1:]
+            
+        # Look up the channel by name
+        channels = self.list_channels()
+        for ch in channels:
+            if ch['name'] == channel:
+                return ch['id']
+                
+        self.logger.warning(f"Could not resolve channel '{channel}' to ID")
+        return None
+    
     def send_formatted_message(self, channel: str, blocks: List[Dict]) -> bool:
         """Send a formatted message with blocks to Slack"""
         

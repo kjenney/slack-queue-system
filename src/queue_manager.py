@@ -86,11 +86,18 @@ class QueueManager:
             if not channel.strip():
                 continue
                 
-            messages = self.slack.get_recent_messages(channel.strip())
+            channel_name = channel.strip()
+            channel_id = self.slack.resolve_channel_id(channel_name)
+            
+            if not channel_id:
+                self.logger.warning(f"Could not resolve channel '{channel_name}' - skipping")
+                continue
+                
+            messages = self.slack.get_recent_messages(channel_id)
             
             for msg in messages:
                 # Skip if already processed
-                if self.db.is_message_processed(msg['ts'], channel):
+                if self.db.is_message_processed(msg['ts'], channel_id):
                     continue
                 
                 # Parse command
@@ -100,11 +107,11 @@ class QueueManager:
                     self._execute_command(
                         command_data, 
                         msg.get('user', 'unknown'),
-                        channel
+                        channel_id
                     )
                     
                     # Mark as processed
-                    self.db.mark_message_processed(msg['ts'], channel)
+                    self.db.mark_message_processed(msg['ts'], channel_id)
     
     def _parse_slack_command(self, text: str) -> Optional[Dict]:
         """Parse Slack message for queue commands"""
