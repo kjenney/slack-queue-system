@@ -1,0 +1,6 @@
+# Slack Queue System Requirements
+# All components are open source
+
+slack-sdk==3.27.1      # Apache License 2.0
+python-dotenv==1.0.1   # BSD License
+schedule==1.2.0        # MIT License
