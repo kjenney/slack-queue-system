@@ -34,6 +34,11 @@ slack-queue-system/
 
 ## Requirements
 
+### For Docker Deployment (Recommended)
+- Docker and Docker Compose
+- Slack workspace with bot creation permissions
+
+### For Native Installation
 - Linux operating system
 - Python 3.8 or higher
 - SQLite3 (usually pre-installed on Linux)
@@ -41,14 +46,18 @@ slack-queue-system/
 
 ## Installation
 
-### 1. Clone or Copy the Project
+Choose between Docker deployment (recommended) or native installation:
+
+### Option A: Docker Deployment (Recommended)
+
+#### 1. Clone or Copy the Project
 
 ```bash
 cd /path/to/your/directory
 # The project has been created at the specified location
 ```
 
-### 2. Create a Slack App
+#### 2. Create a Slack App
 
 1. Go to [https://api.slack.com/apps](https://api.slack.com/apps)
 2. Click "Create New App" → "From scratch"
@@ -64,7 +73,55 @@ cd /path/to/your/directory
 6. Install the app to your workspace
 7. Copy the Bot User OAuth Token (starts with `xoxb-`)
 
-### 3. Run the Setup Script
+#### 3. Configure Environment Variables
+
+Create a `.env` file with your Slack credentials:
+
+```bash
+cp .env.example .env
+nano .env
+```
+
+Update these values:
+- `SLACK_BOT_TOKEN`: Your bot token from step 2
+- `SLACK_CHANNELS`: Comma-separated list of channels to monitor
+- `DAILY_SUMMARY_HOUR`: Hour to send daily summary (0-23)
+
+#### 4. Deploy with Docker
+
+```bash
+# Start both API server and cron job
+docker-compose up -d
+
+# Check status
+docker-compose ps
+
+# View logs
+docker-compose logs -f api
+docker-compose logs -f cron
+```
+
+#### 5. Add Bot to Channels
+
+In Slack, add your bot to the channels you want to monitor:
+- Type `/invite @YourBotName` in each channel
+
+The API server will be available at `http://localhost:5000`
+
+### Option B: Native Installation
+
+#### 1. Clone or Copy the Project
+
+```bash
+cd /path/to/your/directory
+# The project has been created at the specified location
+```
+
+#### 2. Create a Slack App
+
+Follow steps 2-7 from Option A above.
+
+#### 3. Run the Setup Script
 
 ```bash
 cd slack-queue-system
@@ -72,7 +129,7 @@ chmod +x setup.sh
 ./setup.sh
 ```
 
-### 4. Configure Environment Variables
+#### 4. Configure Environment Variables
 
 Edit the `.env` file with your Slack credentials:
 
@@ -85,7 +142,7 @@ Update these values:
 - `SLACK_CHANNELS`: Comma-separated list of channels to monitor
 - `DAILY_SUMMARY_HOUR`: Hour to send daily summary (0-23)
 
-### 5. Add Bot to Channels
+#### 5. Add Bot to Channels
 
 In Slack, add your bot to the channels you want to monitor:
 - Type `/invite @YourBotName` in each channel
@@ -146,7 +203,33 @@ Common cron schedules:
 
 ## Manual Operations
 
-### Test the System
+### Docker Commands
+
+```bash
+# Start services
+docker-compose up -d
+
+# Stop services
+docker-compose down
+
+# View logs
+docker-compose logs -f api
+docker-compose logs -f cron
+
+# Restart services
+docker-compose restart
+
+# View service status
+docker-compose ps
+
+# Access API container shell
+docker-compose exec api bash
+
+# Run cron job manually
+docker-compose exec cron python src/cron_job.py
+```
+
+### Test the System (Native Installation)
 
 ```bash
 cd slack-queue-system
@@ -156,7 +239,9 @@ python src/cron_job.py
 
 ### Local API Server
 
-Start the local REST API server for programmatic access:
+**Docker (Automatic)**: The API server starts automatically with `docker-compose up -d`
+
+**Native Installation**: Start manually:
 
 ```bash
 source venv/bin/activate
