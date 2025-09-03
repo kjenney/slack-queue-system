@@ -153,7 +153,7 @@ In Slack, add your bot to the channels you want to monitor:
 
 Send these commands in any monitored Slack channel:
 
-- `!add task [description]` - Add a new task to the queue
+- `!add task [title] | [description]` - Add a new task with optional description
 - `!list` - Show pending tasks
 - `!complete [task_id]` - Mark a task as complete
 - `!status` - Show queue statistics
@@ -165,10 +165,13 @@ Send these commands in any monitored Slack channel:
 User: !add task Review pull request #142
 Bot: ✅ Added task #1: Review pull request #142
 
+User: !add task Deploy to production | Deploy the latest changes to prod after QA approval
+Bot: ✅ Added task #2: Deploy to production
+
 User: !list
 Bot: 📋 Pending Tasks:
      • #1: Review pull request #142 (medium)
-     • #2: Update documentation (low)
+     • #2: Deploy to production (medium)
 
 User: !complete 1
 Bot: ✅ Marked task #1 as completed!
