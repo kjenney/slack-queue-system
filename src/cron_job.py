@@ -79,11 +79,14 @@ def main():
                         
                         manager.slack.send_message(channel=channel_id, text=msg)
         
-        # Send daily summary if it's the configured time
+        # Send daily summary if it's the configured time (once per day)
         hour = int(os.getenv('DAILY_SUMMARY_HOUR', '9'))
-        current_hour = datetime.now().hour
+        now = datetime.now()
+        current_hour = now.hour
+        current_minute = now.minute
         
-        if current_hour == hour:
+        # Only send summary at the beginning of the hour (first 5 minutes)
+        if current_hour == hour and current_minute < 1:
             logger.info("Sending daily summary...")
             manager.send_daily_summary()
         
