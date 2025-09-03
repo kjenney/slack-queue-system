@@ -120,10 +120,23 @@ class QueueManager:
         
         # Command patterns
         if text.startswith('!add task'):
-            parts = text[9:].strip()
+            content = text[9:].strip()  # Remove "!add task"
+            
+            # Try to parse title and description
+            # Format: !add task Title | Description
+            if '|' in content:
+                title, description = content.split('|', 1)
+                title = title.strip()
+                description = description.strip()
+            else:
+                # No separator, treat as title only
+                title = content
+                description = ""
+            
             return {
                 'action': 'add',
-                'title': parts
+                'title': title,
+                'description': description
             }
         elif text.startswith('!list'):
             return {'action': 'list'}
@@ -151,6 +164,7 @@ class QueueManager:
         if action == 'add':
             item_id = self.add_item(
                 title=command['title'],
+                description=command.get('description', ''),
                 slack_user=user,
                 slack_channel=channel
             )
@@ -192,7 +206,7 @@ class QueueManager:
             
         elif action == 'help':
             msg = """*Available Commands:*
-• `!add task [description]` - Add a new task
+• `!add task [title] | [description]` - Add a new task with optional description
 • `!list` - Show pending tasks
 • `!complete [task_id]` - Mark task as complete
 • `!status` - Show queue statistics
