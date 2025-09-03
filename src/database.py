@@ -163,6 +163,18 @@ class DatabaseManager:
                 
         return None
     
+    def get_all_items(self) -> List[Dict]:
+        """Get all queue items"""
+        
+        with sqlite3.connect(self.db_path) as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            
+            cursor.execute('SELECT * FROM queue_items ORDER BY created_at DESC')
+            rows = cursor.fetchall()
+            
+            return [dict(row) for row in rows]
+    
     def get_items_by_status(self, status: str, assignee: str = None) -> List[Dict]:
         """Get items by status, optionally filtered by assignee"""
         
